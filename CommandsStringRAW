@@ -1,17 +1,21 @@
 ----------------------------------------------------------------
+print("Commands String Executed successfully")
 ----------------------------------------------------------------
----------print("Commands String Executed successfully")---------
-----------------------------------------------------------------
-----------------------------------------------------------------
+
 local player = game.Players.LocalPlayer
 local mouse = player:GetMouse()
 
 -- Função auxiliar para criar botões
 local function createButton(parent, text, position, callback)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 150, 0, 50)
+    button.Size = UDim2.new(0, 200, 0, 40)
     button.Position = position
     button.Text = text
+    button.Font = Enum.Font.SourceSansBold
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.BackgroundColor3 = Color3.fromRGB(44, 62, 80)
+    button.BorderSizePixel = 2
+    button.BorderColor3 = Color3.fromRGB(52, 73, 94)
     button.Parent = parent
     button.MouseButton1Click:Connect(callback)
     return button
@@ -19,80 +23,42 @@ end
 
 -- Criar GUI principal
 local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 250, 0, 400)
+mainFrame.Position = UDim2.new(0, 10, 0, 10)
+mainFrame.BackgroundColor3 = Color3.fromRGB(33, 47, 61)
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(52, 73, 94)
 
--- Criar Click TP Tool
-local tool = Instance.new("Tool", player.Backpack)
-tool.Name = "Click TP"
-tool.RequiresHandle = false
-tool.Activated:Connect(function()
-    mouse.Button1Down:Connect(function()
-        if mouse.Target then
-            player.Character:SetPrimaryPartCFrame(mouse.Hit)
+local closeButton = Instance.new("TextButton", mainFrame)
+closeButton.Size = UDim2.new(0, 20, 0, 20)
+closeButton.Position = UDim2.new(1, -25, 0, 5)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
+closeButton.MouseButton1Click:Connect(function()
+    mainFrame.Visible = not mainFrame.Visible
+end)
+
+-- Botão Copy Map and Scripts
+local copyMapButton = createButton(mainFrame, "Copy Map and Scripts", UDim2.new(0, 25, 0, 40), function()
+    -- Função para copiar o mapa
+    local function copyMap()
+        local mapFolder = Instance.new("Folder")
+        mapFolder.Name = "CopiedMap"
+
+        -- Clonar todo o workspace
+        for _, obj in ipairs(workspace:GetChildren()) do
+            local clone = obj:Clone()
+            clone.Parent = mapFolder
         end
-    end)
-end)
 
--- Botão Fly
-local flying = false
-local flySpeed = 50
-local function fly()
-    local char = player.Character
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
-    local bodyVelocity = Instance.new("BodyVelocity", char.PrimaryPart)
-    bodyVelocity.MaxForce = Vector3.new(4000, 4000, 4000)
-    bodyVelocity.Velocity = Vector3.new(0, flySpeed, 0)
-    return bodyVelocity
-end
-
-local flyButton = createButton(screenGui, "Fly", UDim2.new(0, 10, 0, 10), function()
-    if not flying then
-        flying = fly()
+        -- Salvar o modelo no PlayerGui (simulado para testes locais)
+        mapFolder.Parent = player.PlayerGui
+        print("Mapa e scripts copiados com sucesso!")
     end
+
+    copyMap()
 end)
 
--- Botão Unfly
-local unflyButton = createButton(screenGui, "Unfly", UDim2.new(0, 170, 0, 10), function()
-    if flying then
-        flying:Destroy()
-        flying = false
-    end
-end)
-
--- Botão TP to Player
-local inputBox = Instance.new("TextBox", screenGui)
-inputBox.Size = UDim2.new(0, 150, 0, 50)
-inputBox.Position = UDim2.new(0, 10, 0, 70)
-inputBox.PlaceholderText = "Player Name"
-inputBox.Text = ""
-
-local tpButton = createButton(screenGui, "TP to Player", UDim2.new(0, 170, 0, 70), function()
-    local target = game.Players:FindFirstChild(inputBox.Text)
-    if target and target.Character and target.Character.PrimaryPart then
-        player.Character:SetPrimaryPartCFrame(target.Character.PrimaryPart.CFrame)
-    end
-end)
-
--- Botão Remove Shadows
-local removeShadowsButton = createButton(screenGui, "Remove Shadows", UDim2.new(0, 10, 0, 130), function()
-    for _, light in ipairs(workspace:GetDescendants()) do
-        if light:IsA("Light") then
-            light.Shadows = false
-        end
-    end
-    print("Sombras desativadas!")
-end)
-
--- Botão Noclip
-local noclip = false
-local noclipButton = createButton(screenGui, "Noclip", UDim2.new(0, 10, 0, 190), function()
-    noclip = not noclip
-    if noclip then
-        game:GetService("RunService").Stepped:Connect(function()
-            for _, part in ipairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end)
-    end
-end)
+print("UI criada com sucesso!")
